@@ -15,15 +15,17 @@ class DQLNetwork():
         self.construct_q_network()
 
     def define_model(self):
-        input_layer1 = Input(shape=(6, 6, self.num_tiles))
-        input_layer2 = Input(shape=(self.num_tiles))
+        input_layer1 = Input(shape=(6, 6, 9))
+        input_layer2 = Input(shape=(9))
+        dense1 = Dense(32, activation="sigmoid")(input_layer1)
+        flattened1 = Flatten()(dense1)
         conv1 = Conv2D(filters=4, kernel_size=(2, 2), padding="same", activation="relu")(input_layer1)
         conv2 = Conv2D(filters=4, kernel_size=(3, 3), activation="relu")(conv1)
         pool = MaxPooling2D(pool_size=2, strides=1, padding='same')(conv2)
-        flattened = Flatten()(pool)
-        conc = concatenate([flattened, input_layer2])
-        dense1 = Dense(512, activation="relu")(conc)
-        output = Dense(NUM_ACTIONS)(dense1)
+        flattened2 = Flatten()(pool)
+        conc = concatenate([flattened1, flattened2, input_layer2])
+        dense2 = Dense(512, activation="relu")(conc)
+        output = Dense(NUM_ACTIONS)(dense2)
         model = Model([input_layer1, input_layer2], output)
         model.compile(loss='mse', optimizer='adam')
         return model

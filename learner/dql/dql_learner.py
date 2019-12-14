@@ -9,12 +9,13 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 
-BUFFER_SIZE = 8000 #experience replay buffer size
+BUFFER_SIZE = 20000 #experience replay buffer size
 MINIBATCH_SIZE = 64
 EPSILON_DECAY = 30000
 FINAL_EPSILON = 0.05
 INITIAL_EPSILON = 0.4
 C = 32 #every C iterations, the weigths of model are copied into target_model
+
 
 class DQLearner(Learner):
 
