@@ -14,7 +14,7 @@ class UILearner(Learner):
         x, y = map(int, input().split())
         reward = 0
         if choice == 0:
-            reward, self.grid, self.current_tile = self.env.step("place_current", [x, y])
+            reward, [self.grid, self.current_tile] = self.env.step("place_current", [x, y])
         else:
-            reward, self.grid, self.current_tile = self.env.step("place_from_storehouse", [x, y])
+            reward, [self.grid, self.current_tile] = self.env.step("place_from_storehouse", [x, y])
 

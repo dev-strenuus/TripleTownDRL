@@ -8,13 +8,14 @@ class Env0(Environment):
     rules: https://support.spryfox.com/hc/en-us/articles/219104828-How-to-play-Triple-Town
     rules: https://vulcanpost.com/237711/how-to-be-a-pro-triple-town/
     """
-
     def __init__(self):
         self.grid_size = 6
         self.grid = np.zeros((self.grid_size, self.grid_size), dtype=int)
         self.triple_merge_mapping = {1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7, 7: 8}
-        self.points = {1: 5, 2: 20, 3: 100, 4: 1000, 5: 2000, 6: 3000, 7: 4000,
-                       8: 5000}  # points are realistic only up to 4 for the moment
+        self.points = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
+                       8: 8}
+        # self.points = {1: 5, 2: 20, 3: 100, 4: 1000, 5: 2000, 6: 3000, 7: 4000, 8: 5000} # points are realistic only up to 4 for the moment
+        self.num_tiles = len(self.points) + 1
         self.cum_points = 0
         self.current_tile_type = 0
 
@@ -25,6 +26,8 @@ class Env0(Environment):
             return False
 
     def reset(self):
+        self.grid = np.zeros((self.grid_size, self.grid_size), dtype=int)
+        self.cum_points = 0
         self.generate_tile()
         return self.grid, self.current_tile_type
 
@@ -48,8 +51,10 @@ class Env0(Environment):
             return 0
         if cleaning:
             self.grid[x][y] = 0
-        return 1 + self.dfs(tile, x - 1, y, visited, cleaning) + self.dfs(tile, x + 1, y, visited, cleaning) + self.dfs(tile, x, y - 1,
-                                                                                                    visited, cleaning) + self.dfs(
+        return 1 + self.dfs(tile, x - 1, y, visited, cleaning) + self.dfs(tile, x + 1, y, visited,
+                                                                          cleaning) + self.dfs(tile, x, y - 1,
+                                                                                               visited,
+                                                                                               cleaning) + self.dfs(
             tile, x, y + 1, visited, cleaning)
 
     def check_merge(self, x, y, tile_type):
@@ -100,6 +105,9 @@ class Env0(Environment):
         :param parameters: parameters[0] = x and parameters[1] = y
         :return:
         """
+        if self.is_grid_full():
+            return None
+
         res = None
         if action_type == "place_current":
             if parameters[0] == 0 and parameters[1] == 0:
@@ -110,8 +118,8 @@ class Env0(Environment):
             res = self.place_from_storehouse(parameters[0], parameters[1])
 
         if res is None:
-            return -10, self.grid, self.current_tile_type
+            return -1, [self.grid, self.current_tile_type]
         else:
             self.generate_tile()
-            return res, self.grid, self.current_tile_type
+            return res, [self.grid, self.current_tile_type]
 

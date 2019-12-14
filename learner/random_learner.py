@@ -15,7 +15,7 @@ class RandomLearner(Learner):
             y = np.random.randint(0, 6)
         reward = 0
         if np.random.uniform() > 0.1:
-            reward, self.grid, self.current_tile = self.env.step("place_current", [x, y])
+            reward, [self.grid, self.current_tile] = self.env.step("place_current", [x, y])
         else:
-            reward, self.grid, self.current_tile = self.env.step("place_from_storehouse", [x, y])
+            reward, [self.grid, self.current_tile] = self.env.step("place_from_storehouse", [x, y])
         self.cum_reward += reward
