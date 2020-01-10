@@ -1,31 +1,26 @@
+from environment.environment import Environment
 import numpy as np
 
-from environment.environment import Environment
-
-
 class Env0(Environment):
-    """
-    rules: https://support.spryfox.com/hc/en-us/articles/219104828-How-to-play-Triple-Town
-    rules: https://vulcanpost.com/237711/how-to-be-a-pro-triple-town/
-    """
     def __init__(self):
         self.grid_size = 6
         self.grid = np.zeros((self.grid_size, self.grid_size), dtype=int)
         self.triple_merge_mapping = {1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7, 7: 8}
-        self.points = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
-                       8: 8}
+        # self.points = {1: 0.1, 2: 0.2, 3: 0.3, 4: 0.4, 5: 0.5, 6: 0.6, 7: 0.7,8: 0.8}
         # self.points = {1: 5, 2: 20, 3: 100, 4: 1000, 5: 2000, 6: 3000, 7: 4000, 8: 5000} # points are realistic only up to 4 for the moment
+        self.points = {1: 1, 2: 2, 3: 4, 4: 8, 5: 16, 6: 32, 7: 64, 8: 128}
         self.num_tiles = len(self.points) + 1
         self.cum_points = 0
         self.current_tile_type = 0
 
     def is_grid_full(self):
-        if np.count_nonzero(self.grid) == 16:
+        if np.count_nonzero(self.grid) == self.grid_size ** 2:
             return True
         else:
             return False
 
     def reset(self):
+        # self.grid = np.random.choice(6, self.grid_size**2, p=[0.5, 0.2, 0.1, 0.1, 0.05, 0.05]).reshape((self.grid_size, self.grid_size))
         self.grid = np.zeros((self.grid_size, self.grid_size), dtype=int)
         self.cum_points = 0
         self.generate_tile()
@@ -44,6 +39,8 @@ class Env0(Environment):
     def dfs(self, tile, x, y, visited, cleaning=False):
         if x == 0 and y == 0:
             return 0
+        if tile == 0:
+            return 0
         if x < 0 or x >= self.grid_size or y < 0 or y >= self.grid_size or visited[x][y] == 1:
             return 0
         visited[x][y] = 1
@@ -51,10 +48,9 @@ class Env0(Environment):
             return 0
         if cleaning:
             self.grid[x][y] = 0
-        return 1 + self.dfs(tile, x - 1, y, visited, cleaning) + self.dfs(tile, x + 1, y, visited,
-                                                                          cleaning) + self.dfs(tile, x, y - 1,
-                                                                                               visited,
-                                                                                               cleaning) + self.dfs(
+        return 1 + self.dfs(tile, x - 1, y, visited, cleaning) + self.dfs(tile, x + 1, y, visited, cleaning) + self.dfs(
+            tile, x, y - 1,
+            visited, cleaning) + self.dfs(
             tile, x, y + 1, visited, cleaning)
 
     def check_merge(self, x, y, tile_type):
@@ -85,7 +81,7 @@ class Env0(Environment):
         if self.grid[0][0] != 0:
             return None
         self.grid[0][0] = self.current_tile_type
-        return 0
+        return 0.0001
 
     def place_from_storehouse(self, x, y):
         if self.grid[0][0] == 0:
@@ -106,7 +102,7 @@ class Env0(Environment):
         :return:
         """
         if self.is_grid_full():
-            return None
+            return -1, [self.grid, 0]
 
         res = None
         if action_type == "place_current":
@@ -118,8 +114,7 @@ class Env0(Environment):
             res = self.place_from_storehouse(parameters[0], parameters[1])
 
         if res is None:
-            return -1, [self.grid, self.current_tile_type]
+            return 0, [self.grid, self.current_tile_type]
         else:
             self.generate_tile()
             return res, [self.grid, self.current_tile_type]
-

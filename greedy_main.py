@@ -8,6 +8,6 @@ if __name__== "__main__":
         env = Env0()
         learner = GreedyLearner(env)
         while env.is_grid_full() is not True:
-            learner.select_action()
+            act = learner.select_action()
         tot_reward += learner.cum_reward
     print(tot_reward/num_experiments)

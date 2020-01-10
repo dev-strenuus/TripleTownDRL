@@ -19,7 +19,7 @@ class GreedyLearner(RandomLearner):
                 if self.grid[x][y] == 0 and self.env.check_merge(self.current_tile, x, y):
                     reward, [self.grid, self.current_tile] = self.env.step("place_current", [x, y])
                     self.cum_reward += reward
-                    return
+                    return x * 6 + y
 
         if self.grid[0][0] != 0:
             for x in shuffle_x:
@@ -27,25 +27,25 @@ class GreedyLearner(RandomLearner):
                     if self.grid[x][y] == 0 and self.env.check_merge(self.grid[0][0], x, y):
                         reward, [self.grid, self.current_tile] = self.env.step("place_from_storehouse", [x, y])
                         self.cum_reward += reward
-                        return
+                        return x * 6 + y + 36
         for x in shuffle_x:
             for y in shuffle_y:
-                if self.grid[x][y] == self.current_tile:
-                    if x-1 >= 0 and self.grid[x-1][y] == 0:
-                        reward, [self.grid, self.current_tile] = self.env.step("place_current", [x-1, y])
+                if (x > 0 or y > 0) and self.grid[x][y] == self.current_tile:
+                    if x - 1 >= 0 and self.grid[x - 1][y] == 0 and (x - 1 > 0 or y > 0):
+                        reward, [self.grid, self.current_tile] = self.env.step("place_current", [x - 1, y])
                         self.cum_reward += reward
-                        return
-                    if x+1 < self.grid.shape[0] and self.grid[x+1][y] == 0:
-                        reward, [self.grid, self.current_tile] = self.env.step("place_current", [x+1, y])
+                        return (x - 1) * 6 + y
+                    if x + 1 < self.grid.shape[0] and self.grid[x + 1][y] == 0:
+                        reward, [self.grid, self.current_tile] = self.env.step("place_current", [x + 1, y])
                         self.cum_reward += reward
-                        return
-                    if y-1 >= 0 and self.grid[x][y-1] == 0:
-                        reward, [self.grid, self.current_tile] = self.env.step("place_current", [x, y-1])
+                        return (x + 1) * 6 + y
+                    if y - 1 >= 0 and self.grid[x][y - 1] == 0 and (x > 0 or y - 1 > 0):
+                        reward, [self.grid, self.current_tile] = self.env.step("place_current", [x, y - 1])
                         self.cum_reward += reward
-                        return
-                    if y+1 < self.grid.shape[1] and self.grid[x][y+1] == 0:
-                        reward, [self.grid, self.current_tile] = self.env.step("place_current", [x, y+1])
+                        return x * 6 + y - 1
+                    if y + 1 < self.grid.shape[1] and self.grid[x][y + 1] == 0:
+                        reward, [self.grid, self.current_tile] = self.env.step("place_current", [x, y + 1])
                         self.cum_reward += reward
-                        return
+                        return x * 6 + y + 1
 
-        super().select_action()
+        return super().select_action()

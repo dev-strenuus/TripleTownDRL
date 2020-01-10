@@ -3,7 +3,7 @@ from learner.random_learner import RandomLearner
 
 if __name__== "__main__":
     tot_reward = 0
-    num_experiments = 100
+    num_experiments = 200
     for experiment in range(num_experiments):
         env = Env0()
         learner = RandomLearner(env)
